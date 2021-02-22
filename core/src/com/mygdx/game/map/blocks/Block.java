@@ -28,6 +28,7 @@ public class Block {
     public float getBlockHeight() { return this.blockHeight; }
     public float getBlockWidth() { return this.blockWidth; }
 
+    /*
     // Used to determine if player/entity could possibly interact/collide with the block.
     public boolean isEntityAtX(float xLeftSide, float xRightSide) {
         boolean playerInBlockRange = (xLeftSide <= this.x+this.blockWidth) && (xRightSide >= this.x);
@@ -59,5 +60,5 @@ public class Block {
         boolean collides = (currPos <= this.y) && (nextPos > this.y);
         return collides;
     }
-
+    */
 }

@@ -1,5 +1,8 @@
 package com.mygdx.game.map;
 
+import com.mygdx.game.entity.Target;
+import java.lang.Math;
+
 /*
 ####################################################################################################
 TODO:
@@ -31,6 +34,7 @@ public class Map {
     }
     // Potential have different types of blocks or blocks within a certain location to save time searching/rendering.
     private ArrayList<Block> blocks = new ArrayList<Block>();
+    private ArrayList<Target> targets = new ArrayList<>();
 
     public Map(String filename) throws FileNotFoundException {
         File file = new File(filename);
@@ -43,15 +47,44 @@ public class Map {
             String blockType = blockInfo[2];
             blocks.add(new Block(x, y, blockType));
         }
+
+        targets.add(new Target(4, 200, 50));
+        targets.add(new Target(4, 400, 50));
+        targets.add(new Target(4, 200, 180));
+        targets.add(new Target(4, 300, 180));
+        targets.add(new Target(4, 400, 180));
+        targets.add(new Target(4, 230, 180));
+        targets.add(new Target(4, 330, 180));
+        targets.add(new Target(4, 430, 180));
+        targets.add(new Target(4, 260, 180));
+        targets.add(new Target(4, 360, 180));
+        targets.add(new Target(4, 460, 180));
+
+        targets.add(new Target(4, 200, 150));
+        targets.add(new Target(4, 300, 150));
+        targets.add(new Target(4, 400, 150));
+        targets.add(new Target(4, 230, 150));
+        targets.add(new Target(4, 330, 150));
+        targets.add(new Target(4, 430, 150));
+        targets.add(new Target(4, 260, 150));
+        targets.add(new Target(4, 360, 150));
+        targets.add(new Target(4, 460, 150));
+
     }
 
     public ArrayList<Block> getMap() {
         return blocks;
     }
+    public ArrayList<Target> getTargets() { return targets; }
 
     public int getSize() {
         return blocks.size();
     }
+
+    public void destroyTarget(Target target) {
+        targets.remove(target);
+    }
+
 
     // Helper function
     private String[] getBlockInfo(String line)

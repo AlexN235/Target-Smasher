@@ -10,12 +10,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 // local class imports
 import com.mygdx.game.map.Map;
 import com.mygdx.game.map.blocks.Block;
+import com.mygdx.game.entity.Target;
 import com.mygdx.game.player.Player;
 
 // regular imports
 import java.io.FileNotFoundException;
 import java.lang.Math;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MainGame extends ApplicationAdapter {
 	Random rand = new Random();
@@ -23,9 +26,6 @@ public class MainGame extends ApplicationAdapter {
 
 	ShapeRenderer shapeRenderer;
 	com.mygdx.game.player.Player player = new Player(300, 300, 30, 15);
-
-	final float X_SPEED = 200;
-	final float Y_SPEED = 400;
 
 	final float GRAVITY_SPEED = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2) ;
 
@@ -48,8 +48,6 @@ public class MainGame extends ApplicationAdapter {
 		shapeRenderer = new ShapeRenderer();
 	}
 
-
-
 	@Override
 	public void render () {
 		player.setGravity(GRAVITY_SPEED); // figure out how to move this to outside.
@@ -66,35 +64,33 @@ public class MainGame extends ApplicationAdapter {
 		// Gravity
 		player.applyGravity(GRAVITY_SPEED);
 
+		// Momentum
+		player.applyMomentum();
+
+		// Player Attack
+		float[] playerAttData = null;
+		if(player.applyAttack()) {
+			playerAttData = player.getAttackFrame();
+		}
+
 		// Player Input
 		boolean[] input = new boolean[8];
 		if (Gdx.input.isKeyPressed(Input.Keys.W)){
-			/*
-			if(!player.isInAir()) {
-				player.jump(GRAVITY_SPEED);
-				newPlayerPosY++;        // Added to treat player an an object in the air.
-			}
-			*/
 			input[4] = true;
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.S)){
-			//newPlayerPosY--;
 			input[5] = true;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.A)){
-			//newPlayerPosX += -3;
 			input[6] = true;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.D)){
-			//newPlayerPosX += 3;
 			input[7] = true;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.L)){
-			//newPlayerPosX += 3;
 			input[3] = true;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.K)){
-			//newPlayerPosX += 3;
 			input[2] = true;
 		}
 
@@ -105,13 +101,13 @@ public class MainGame extends ApplicationAdapter {
 			if(hitWallTop(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
 				player.setPosY(blk.getY()+blk.getBlockHeight());
 			}
-			if(hitWallTop(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
+			if(hitWallBot(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
 				player.setPosY(blk.getY()-player.getHeight());
 			}
-			if(hitWallTop(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
+			if(hitWallLeft(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
 				player.setPosX(blk.getX()-player.getWidth());
 			}
-			if(hitWallTop(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
+			if(hitWallRight(preRenderPosX, preRenderPosY, player.getPosX(), player.getPosY(), blk)) {
 				player.setPosX(blk.getX()+blk.getBlockWidth());
 			}
 		}
@@ -126,12 +122,32 @@ public class MainGame extends ApplicationAdapter {
 			}
 		}
 
+		// Render Player
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-		shapeRenderer.setColor(0, 0, 0, .5f);
+		shapeRenderer.setColor(1, 1, 1, .5f);
 		shapeRenderer.rect(player.getPosX(), player.getPosY(), player.getWidth(), player.getHeight());
+
+		// Player Attack
+		if(playerAttData != null) {
+			List<Target> toRemove = new ArrayList<Target>();
+			for(Target target : myMap.getTargets()) {
+				if(target.targetHit(playerAttData[0], playerAttData[1], playerAttData[2]))
+					toRemove.add(target);
+			}
+			for(Target target : toRemove) {
+				myMap.destroyTarget(target);
+			}
+		}
+
+		// Render Entities
+		for(Target target : myMap.getTargets()) {
+			shapeRenderer.setColor(1.0f, 0, 0, .5f);
+			shapeRenderer.circle(target.getX(), target.getY(), target.getSize());
+		}
 
 		// Render Map
 		for(Block blk : myMap.getMap()) {
+			shapeRenderer.setColor(.5f, 0, .5f, .5f);
 			shapeRenderer.rect(blk.getX(), blk.getY(), blk.getBlockWidth(), blk.getBlockHeight());
 		}
 		//shapeRenderer.rect(wallX, wallY, wallWidth, wallHeight);
@@ -171,41 +187,16 @@ public class MainGame extends ApplicationAdapter {
 		}
 		return false;
 	}
-
-	private float applyGravity() {
-		return GRAVITY_SPEED;
-	}
-
 	private boolean playerInRange(float playerSideOne, float playerSideTwo, float sideOne, float sideTwo) {
 		boolean inRange = playerSideTwo > sideOne && playerSideOne < sideTwo;
 		return inRange;
 	}
 
+
 	// Helper function : Check if location is outside of the boundary
 	private boolean outOfBoundary(float x, float y) {
 		if(x > Gdx.graphics.getWidth() || x > Gdx.graphics.getHeight()) return true;
 		else return x < 0 || y < 0;
-	}
-
-	// Helper function : Get a direction to move.
-	private float[] getDir(){
-		float x = 0;
-		float y = 0;
-		randDir = rand.nextInt(4);
-
-		if(randDir==0){
-			x = 1*X_SPEED*Gdx.graphics.getDeltaTime();
-		}
-		else if(randDir==1){
-			y = 1*Y_SPEED*Gdx.graphics.getDeltaTime();
-		}
-		else if(randDir==2){
-			x = -1*X_SPEED*Gdx.graphics.getDeltaTime();
-		}
-		else{
-			y = -1*Y_SPEED*Gdx.graphics.getDeltaTime();
-		}
-		return new float[] {x, y};
 	}
 
 	@Override

@@ -11,14 +11,12 @@ public class PlayerInput {
         System.out.println(p.boolToByte(in));
         System.out.println(p.getAction(in));
     }
-    public enum playerActions {    // A list of all actions the players could take.
+    protected enum playerActions {    // A list of all actions the players could take.
         DONOTHING,
         MOVELEFT,
         MOVERIGHT,
         JUMP,
         ATTACK,
-        ATTACKLEFT,
-        ATTACKRIGHT,
         ATTACKUP
     }
 
