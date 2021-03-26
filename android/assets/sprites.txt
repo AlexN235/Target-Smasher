@@ -1,0 +1,96 @@
+sprites.png
+size: 128, 608
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+banana
+  rotate: false
+  xy: 0, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+cherries
+  rotate: false
+  xy: 0, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+crate
+  rotate: false
+  xy: 0, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+grass1
+  rotate: false
+  xy: 0, 384
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+grass2
+  rotate: false
+  xy: 48, 384
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+orange
+  rotate: false
+  xy: 0, 432
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+rock_platform_botleft
+  rotate: false
+  xy: 0, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rock_platform_botmid
+  rotate: false
+  xy: 16, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rock_platform_botright
+  rotate: false
+  xy: 32, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rock_platform_topleft
+  rotate: false
+  xy: 48, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rock_platform_topmid
+  rotate: false
+  xy: 64, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rock_platform_topright
+  rotate: false
+  xy: 80, 560
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+target
+  rotate: false
+  xy: 0, 576
+  size: 33, 32
+  orig: 33, 32
+  offset: 0, 0
+  index: -1

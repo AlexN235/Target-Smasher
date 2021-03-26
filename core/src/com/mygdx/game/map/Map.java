@@ -48,27 +48,27 @@ public class Map {
             blocks.add(new Block(x, y, blockType));
         }
 
-        targets.add(new Target(4, 200, 50));
-        targets.add(new Target(4, 400, 50));
-        targets.add(new Target(4, 200, 180));
-        targets.add(new Target(4, 300, 180));
-        targets.add(new Target(4, 400, 180));
-        targets.add(new Target(4, 230, 180));
-        targets.add(new Target(4, 330, 180));
-        targets.add(new Target(4, 430, 180));
-        targets.add(new Target(4, 260, 180));
-        targets.add(new Target(4, 360, 180));
-        targets.add(new Target(4, 460, 180));
+        targets.add(new Target(15, 200, 50));
+        targets.add(new Target(15, 400, 50));
+        targets.add(new Target(15, 200, 180));
+        targets.add(new Target(15, 300, 180));
+        targets.add(new Target(15, 400, 180));
+        targets.add(new Target(15, 230, 180));
+        targets.add(new Target(15, 330, 180));
+        targets.add(new Target(15, 430, 180));
+        targets.add(new Target(15, 260, 180));
+        targets.add(new Target(15, 360, 180));
+        targets.add(new Target(15, 460, 180));
 
-        targets.add(new Target(4, 200, 150));
-        targets.add(new Target(4, 300, 150));
-        targets.add(new Target(4, 400, 150));
-        targets.add(new Target(4, 230, 150));
-        targets.add(new Target(4, 330, 150));
-        targets.add(new Target(4, 430, 150));
-        targets.add(new Target(4, 260, 150));
-        targets.add(new Target(4, 360, 150));
-        targets.add(new Target(4, 460, 150));
+        targets.add(new Target(15, 200, 150));
+        targets.add(new Target(15, 300, 150));
+        targets.add(new Target(15, 400, 150));
+        targets.add(new Target(15, 230, 150));
+        targets.add(new Target(15, 330, 150));
+        targets.add(new Target(15, 430, 150));
+        targets.add(new Target(15, 260, 150));
+        targets.add(new Target(15, 360, 150));
+        targets.add(new Target(15, 460, 150));
 
     }
 

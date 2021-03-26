@@ -5,8 +5,8 @@ public class Block {
     private float y;
     private String type;
 
-    final private float blockHeight = 10;
-    final private float blockWidth = 10;
+    final private float blockHeight = 50;
+    final private float blockWidth = 50;
 
     Block() {}
 

@@ -7,7 +7,9 @@ import java.util.Set;
 public class PlayerAttack {
     protected enum Attack {
         Basic,
-        BasicUp
+        BasicUp,
+        BasicAir,
+        UpAir
     }
 
     private HashMap<Integer, float[]> attTimeInfo = new HashMap<Integer, float[]>();
@@ -23,7 +25,7 @@ public class PlayerAttack {
         this.hitboxSize = 10;
         this.totalAttackFrame = 5;
 
-        float[] val = {10, 15};
+        float[] val = {0, 0};
         attTimeInfo.put(0 , val);
         attTimeInfo.put(1 , val);
         attTimeInfo.put(2 , val);
@@ -44,7 +46,12 @@ public class PlayerAttack {
                 break;
             case BasicUp:
                 basicUp(playerWidth, playerHeight);
-                System.out.println("Hello1");
+                break;
+            case BasicAir:
+                basicAir(playerWidth, playerHeight);
+                break;
+            case UpAir:
+                upAir(playerWidth, playerHeight);
                 break;
             default:
                 this.attack = null;
@@ -78,24 +85,34 @@ public class PlayerAttack {
     private void basic(float playerWidth, float playerHeight) {
         this.attackFrame = 0;
         this.hitboxSize = 10;
-        this.totalAttackFrame = 10;
+        this.totalAttackFrame = 30;
 
-        float[] val = {playerWidth, playerHeight*0.7f};
+        float[] val = {-0.3f*playerWidth, 0.5f*playerHeight};
         float[] valZero = {0, 0};
-        attTimeInfo.put(0 , val);
-        attTimeInfo.put(1 , val);
-        attTimeInfo.put(2 , val);
-        attTimeInfo.put(3 , val);
-        attTimeInfo.put(4 , val);
+
         attTimeInfo.put(5 , val);
-        for(int i=5; i<totalAttackFrame+1;i++) {
+        attTimeInfo.put(6 , val);
+        attTimeInfo.put(7 , val);
+        attTimeInfo.put(8 , val);
+        attTimeInfo.put(9 , val);
+        attTimeInfo.put(10 , val);
+        attTimeInfo.put(11 , val);
+        attTimeInfo.put(12 , val);
+        attTimeInfo.put(13 , val);
+        attTimeInfo.put(14 , val);
+        attTimeInfo.put(15 , val);
+        attTimeInfo.put(16 , val);
+        for(int i=0; i<5;i++) {
+            attTimeInfo.put(i, valZero);
+        }
+        for(int i=16; i<totalAttackFrame+1;i++) {
             attTimeInfo.put(i, valZero);
         }
     }
     private void basicUp(float playerWidth, float playerHeight) {
         this.attackFrame = 0;
         this.hitboxSize = 10;
-        this.totalAttackFrame = 15;
+        this.totalAttackFrame = 54;
 
         float[] val = {0, playerHeight*1.3f};
         float[] valZero = {0, 0};
@@ -105,7 +122,74 @@ public class PlayerAttack {
         attTimeInfo.put(3 , val);
         attTimeInfo.put(4 , val);
         attTimeInfo.put(5 , val);
+        attTimeInfo.put(6 , val);
+        attTimeInfo.put(7 , val);
+        attTimeInfo.put(8 , val);
+        attTimeInfo.put(9 , val);
+        attTimeInfo.put(10 , val);
+        attTimeInfo.put(11 , val);
         for(int i=5; i<totalAttackFrame+1;i++) {
+            attTimeInfo.put(i, valZero);
+        }
+    }
+
+    private void basicAir(float playerWidth, float playerHeight) {
+        this.attackFrame = 0;
+        this.hitboxSize = 10;
+        this.totalAttackFrame = 36;
+
+        float[] val1 = {-0.3f*playerWidth, 0.5f*playerHeight};
+        float[] val2 = {-0.3f*playerWidth, 0.3f*playerHeight};
+        float[] valZero = {0, 0};
+        attTimeInfo.put(10 , val1);
+        attTimeInfo.put(11 , val1);
+        attTimeInfo.put(12 , val1);
+        attTimeInfo.put(13 , val1);
+        attTimeInfo.put(14 , val1);
+        attTimeInfo.put(15 , val1);
+        attTimeInfo.put(16 , val1);
+        attTimeInfo.put(17 , val1);
+        attTimeInfo.put(18 , val2);
+        attTimeInfo.put(19 , val2);
+        attTimeInfo.put(20 , val2);
+        attTimeInfo.put(21 , val2);
+        attTimeInfo.put(22 , val2);
+        attTimeInfo.put(23 , val2);
+        attTimeInfo.put(24 , val2);
+        for(int i=0; i<10+1;i++) {
+            attTimeInfo.put(i, valZero);
+        }
+        for(int i=24; i<totalAttackFrame+1;i++) {
+            attTimeInfo.put(i, valZero);
+        }
+    }
+
+    private void upAir(float playerWidth, float playerHeight) {
+        this.attackFrame = 0;
+        this.hitboxSize = 10;
+        this.totalAttackFrame = 30;
+
+        float[] val = {-0.5f*playerWidth, 0.8f*playerHeight};
+        float[] valZero = {0, 0};
+        attTimeInfo.put(10 , val);
+        attTimeInfo.put(11 , val);
+        attTimeInfo.put(12 , val);
+        attTimeInfo.put(13 , val);
+        attTimeInfo.put(14 , val);
+        attTimeInfo.put(15 , val);
+        attTimeInfo.put(16 , val);
+        attTimeInfo.put(17 , val);
+        attTimeInfo.put(18 , val);
+        attTimeInfo.put(19 , val);
+        attTimeInfo.put(20 , val);
+        attTimeInfo.put(21 , val);
+        attTimeInfo.put(22 , val);
+        attTimeInfo.put(23 , val);
+        attTimeInfo.put(24 , val);
+        for(int i=0; i<10;i++) {
+            attTimeInfo.put(i, valZero);
+        }
+        for(int i=24; i<totalAttackFrame+1;i++) {
             attTimeInfo.put(i, valZero);
         }
     }

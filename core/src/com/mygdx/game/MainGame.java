@@ -5,9 +5,14 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 // local class imports
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.mygdx.game.map.Map;
 import com.mygdx.game.map.blocks.Block;
 import com.mygdx.game.entity.Target;
@@ -21,18 +26,36 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MainGame extends ApplicationAdapter {
+	// Shape Renderer
+	ShapeRenderer shapeRenderer;
+	com.mygdx.game.player.Player player;
+
+	// Sprite Renderer
+	TextureAtlas mapTexture;
+	TextureAtlas playerTexture;
+
+	Sprite banana;
+	Sprite standing;
+	Sprite crate;
+	Sprite orange;
+	Sprite smashTarget;
+
+	SpriteBatch batch;
+
+	// Camera
+	OrthographicCamera camera;
+	ExtendViewport viewport;
+
 	Random rand = new Random();
 	int randDir;
 
-	ShapeRenderer shapeRenderer;
-	com.mygdx.game.player.Player player = new Player(300, 300, 30, 15);
-
-	final float GRAVITY_SPEED = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2) ;
+	float GRAVITY_SPEED;
 
 	String dir = System.getProperty("user.dir");
 	String path = "/core/src/com/mygdx/game/map/maps/";
 	String mapName = "testmap1.txt";
 	final String mapPath = dir.substring(0, dir.length()-15) + path + mapName;
+
 
 	com.mygdx.game.map.Map myMap;
 	{
@@ -46,20 +69,44 @@ public class MainGame extends ApplicationAdapter {
 	@Override
 	public void create () {
 		shapeRenderer = new ShapeRenderer();
+
+		// Camera
+		camera = new OrthographicCamera(100, 100);
+		viewport = new ExtendViewport(400, 400, camera);
+
+		// Textures
+		String dir = System.getProperty("user.dir") + "/";
+		mapTexture = new TextureAtlas(dir+"sprites.txt");
+		playerTexture = new TextureAtlas(dir+"playersprites.txt");
+		crate = mapTexture.createSprite("crate");
+		orange = mapTexture.createSprite("orange");
+		smashTarget = mapTexture.createSprite("target");
+		standing = playerTexture.createSprite("standing");
+		standing.flip(true, false);
+		batch = new SpriteBatch();
+
+		player = new Player(300, 300, playerTexture);
+		GRAVITY_SPEED = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2);
 	}
+
+
+	@Override
+	public void resize(int width, int height) {
+		viewport.update(width, height, true);
+		batch.setProjectionMatrix(camera.combined);
+	}
+
 
 	@Override
 	public void render () {
 		player.setGravity(GRAVITY_SPEED); // figure out how to move this to outside.
-		Gdx.gl.glClearColor(.25f, .25f, .25f, 1);
+		Gdx.gl.glClearColor(.57f, .77f, .85f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		// Keep track of the original position
 		float preRenderPosX, preRenderPosY, newPlayerPosX, newPlayerPosY;
 		preRenderPosX = player.getPosX();
 		preRenderPosY = player.getPosY();
-		newPlayerPosX = player.getPosX();
-		newPlayerPosY = player.getPosY();
 
 		// Gravity
 		player.applyGravity(GRAVITY_SPEED);
@@ -69,6 +116,7 @@ public class MainGame extends ApplicationAdapter {
 
 		// Player Attack
 		float[] playerAttData = null;
+		//System.out.println(player.applyAttack());
 		if(player.applyAttack()) {
 			playerAttData = player.getAttackFrame();
 		}
@@ -119,14 +167,16 @@ public class MainGame extends ApplicationAdapter {
 					player.setInAir(false);
 					player.setJumpVelocity(0);
 				}
+				else
+					player.setInAir(true);
 			}
 		}
 
 		// Render Player
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 		shapeRenderer.setColor(1, 1, 1, .5f);
-		shapeRenderer.rect(player.getPosX(), player.getPosY(), player.getWidth(), player.getHeight());
 
+		batch.begin();
 		// Player Attack
 		if(playerAttData != null) {
 			List<Target> toRemove = new ArrayList<Target>();
@@ -137,20 +187,26 @@ public class MainGame extends ApplicationAdapter {
 			for(Target target : toRemove) {
 				myMap.destroyTarget(target);
 			}
+			batch.draw(orange, playerAttData[0], playerAttData[1], playerAttData[2], playerAttData[2]);
+			//System.out.println(playerAttData[0] + " : " + playerAttData[1] + " : " + playerAttData[2]);
 		}
+
 
 		// Render Entities
 		for(Target target : myMap.getTargets()) {
 			shapeRenderer.setColor(1.0f, 0, 0, .5f);
 			shapeRenderer.circle(target.getX(), target.getY(), target.getSize());
+			batch.draw(smashTarget, target.getX(), target.getY(), target.getSize(), target.getSize());
 		}
 
 		// Render Map
+		player.draw(batch);
+
 		for(Block blk : myMap.getMap()) {
-			shapeRenderer.setColor(.5f, 0, .5f, .5f);
-			shapeRenderer.rect(blk.getX(), blk.getY(), blk.getBlockWidth(), blk.getBlockHeight());
+			batch.draw(crate, blk.getX(), blk.getY(), blk.getBlockWidth(), blk.getBlockHeight());
 		}
 		//shapeRenderer.rect(wallX, wallY, wallWidth, wallHeight);
+		batch.end();
 		shapeRenderer.end();
 	}
 
@@ -202,6 +258,8 @@ public class MainGame extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		shapeRenderer.dispose();
+		mapTexture.dispose();
+		playerTexture.dispose();
 		//batch.dispose();
 		//font.dispose();
 	}
