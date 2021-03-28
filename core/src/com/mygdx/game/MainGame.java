@@ -17,6 +17,7 @@ import com.mygdx.game.map.Map;
 import com.mygdx.game.map.blocks.Block;
 import com.mygdx.game.entity.Target;
 import com.mygdx.game.player.Player;
+import com.mygdx.game.player.AttackFrame;
 
 // regular imports
 import java.io.FileNotFoundException;
@@ -104,7 +105,7 @@ public class MainGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		// Keep track of the original position
-		float preRenderPosX, preRenderPosY, newPlayerPosX, newPlayerPosY;
+		float preRenderPosX, preRenderPosY;
 		preRenderPosX = player.getPosX();
 		preRenderPosY = player.getPosY();
 
@@ -115,7 +116,7 @@ public class MainGame extends ApplicationAdapter {
 		player.applyMomentum();
 
 		// Player Attack
-		float[] playerAttData = null;
+		AttackFrame playerAttData = null;
 		//System.out.println(player.applyAttack());
 		if(player.applyAttack()) {
 			playerAttData = player.getAttackFrame();
@@ -143,6 +144,7 @@ public class MainGame extends ApplicationAdapter {
 		}
 
 		player.doAction(input);
+		player.applyFalling(preRenderPosY);
 
 		// Checks if player hits a wall.
 		for(Block blk : myMap.getMap()) {
@@ -179,18 +181,23 @@ public class MainGame extends ApplicationAdapter {
 		batch.begin();
 		// Player Attack
 		if(playerAttData != null) {
-			List<Target> toRemove = new ArrayList<Target>();
-			for(Target target : myMap.getTargets()) {
-				if(target.targetHit(playerAttData[0], playerAttData[1], playerAttData[2]))
-					toRemove.add(target);
-			}
-			for(Target target : toRemove) {
-				myMap.destroyTarget(target);
-			}
-			batch.draw(orange, playerAttData[0], playerAttData[1], playerAttData[2], playerAttData[2]);
-			//System.out.println(playerAttData[0] + " : " + playerAttData[1] + " : " + playerAttData[2]);
-		}
+			if(!playerAttData.isEmptyFrame()) {
+				float hitboxX, hitboxY, hitboxSize;
+				hitboxX = player.getPosX() + playerAttData.getPosX();
+				hitboxY = player.getPosY() + playerAttData.getPosY();
+				hitboxSize = playerAttData.getSize();
 
+				List<Target> toRemove = new ArrayList<Target>();
+				for(Target target : myMap.getTargets()) {
+					if(target.targetHit(hitboxX, hitboxY, hitboxSize))
+						toRemove.add(target);
+				}
+				for(Target target : toRemove) {
+					myMap.destroyTarget(target);
+				}
+				batch.draw(orange, hitboxX, hitboxY, hitboxSize, hitboxSize);
+			}
+		}
 
 		// Render Entities
 		for(Target target : myMap.getTargets()) {

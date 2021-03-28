@@ -14,7 +14,6 @@ import javax.xml.soap.Text;
 TODO:
 - Sprites/Visuals
 - Sound
-- Falling off block changes player state to inAir.
 ####################################################################################################
 */
 
@@ -100,13 +99,11 @@ public class Player {
     public Player(TextureAtlas sprites) {
         this.posX = 0;
         this.posY = 0;
-        //playerSprites = sprites;
         getAnimations();
     }
     public Player(float posX, float posY, TextureAtlas sprites) {
         this.posX = posX;
         this.posY = posY;
-        //playerSprites = sprites;
         getAnimations();
     }
     public Player(float posX, float posY, float height, float width, TextureAtlas sprites) {
@@ -114,7 +111,6 @@ public class Player {
         this.posY = posY;
         this.height = height;
         this.width = width;
-        //playerSprites = sprites;
         getAnimations();
     }
 
@@ -247,6 +243,11 @@ public class Player {
     }
 
     // Functions to update the player.
+    public void applyFalling(float newY) {
+        if(newY > this.posY && isInAir()) {
+            currAnimation = playerAnimation.FALLING;
+        }
+    }
     public void applyGravity(float g) {
         this.jumpVelocity += g;
 
@@ -276,12 +277,9 @@ public class Player {
         }
         return true;
     }
-    public float[] getAttackFrame() {
-        float[] hitboxData = this.att.getNext();
-        hitboxData[0] = this.posX
-                + ((this.playerDirection == playerDirection.RIGHT)
-                ? (1*hitboxData[0])+this.width : (-1*hitboxData[0]));
-        hitboxData[1] += this.posY;
+    public AttackFrame getAttackFrame() {
+        boolean facingRight = this.playerDirection == playerDirection.RIGHT;
+        AttackFrame hitboxData = this.att.getNext(this.width, facingRight);
         return hitboxData;
     }
 
@@ -294,7 +292,6 @@ public class Player {
 
         // Get the correct animation for the action.
         Sprite[] animationInfo;
-
         switch(currAnimation) {
             case ATTACKBASIC:
                 animationInfo = attackAnimation;
