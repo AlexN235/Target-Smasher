@@ -1,7 +1,9 @@
 package com.mygdx.game.map;
 
-import com.mygdx.game.entity.Target;
-import java.lang.Math;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.mygdx.game.map.entity.Target;
 
 /*
 ####################################################################################################
@@ -13,79 +15,89 @@ TODO:
 */
 
 import java.io.FileNotFoundException;
-import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import com.mygdx.game.map.blocks.Block;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 import java.io.File;
-import java.nio.file.*;
 //import com.mygdx.game.map.maps.*;
 
 public class Map {
-
-    public static void main(String[] args) throws FileNotFoundException {
-        // for testing.
-        String dir = System.getProperty("user.dir");
-        String path = "/core/src/com/mygdx/game/map/maps/";
-        String name = "testmap1.txt";
-        Map myMap = new Map(dir+path+name);
-
-        System.out.println(myMap.blocks.get(5).getX());
-    }
     // Potential have different types of blocks or blocks within a certain location to save time searching/rendering.
     private ArrayList<Block> blocks = new ArrayList<Block>();
-    private ArrayList<Target> targets = new ArrayList<>();
+    private ArrayList<Target> targets = new ArrayList<Target>();
+    private HashMap<String, Sprite> mapSprites = new HashMap<String, Sprite>();
 
-    public Map(String filename) throws FileNotFoundException {
+    private float sizeX;
+    private float sizeY;
+
+    public Map(String filename, TextureAtlas sprites) throws FileNotFoundException {
+        loadMapResources(filename, sprites);
+    }
+
+    private void loadMapResources(String filename, TextureAtlas sprites) throws FileNotFoundException {
+        // load block textures for the map.
         File file = new File(filename);
         Scanner scan = new Scanner(file);
+        List<String> texture = new ArrayList<String>();
         while(scan.hasNextLine()) {
+            // Save Blocks
             String[] blockInfo = getBlockInfo(scan.nextLine());
-
             float x = Float.parseFloat(blockInfo[0]);
             float y = Float.parseFloat(blockInfo[1]);
-            String blockType = blockInfo[2];
-            blocks.add(new Block(x, y, blockType));
+            float height = Float.parseFloat(blockInfo[2]);
+            float width = Float.parseFloat(blockInfo[3]);
+            String blockType = blockInfo[4];
+
+            if(blockType.equals("target"))
+                this.targets.add(new Target(height,8, x-200, y-30));
+            else
+                this.blocks.add(new Block(x, y, blockType, height, width));
+
+            // save sprite names
+            if(!texture.contains(blockType))
+                texture.add(blockType);
         }
 
-        targets.add(new Target(15, 200, 50));
-        targets.add(new Target(15, 400, 50));
-        targets.add(new Target(15, 200, 180));
-        targets.add(new Target(15, 300, 180));
-        targets.add(new Target(15, 400, 180));
-        targets.add(new Target(15, 230, 180));
-        targets.add(new Target(15, 330, 180));
-        targets.add(new Target(15, 430, 180));
-        targets.add(new Target(15, 260, 180));
-        targets.add(new Target(15, 360, 180));
-        targets.add(new Target(15, 460, 180));
-
-        targets.add(new Target(15, 200, 150));
-        targets.add(new Target(15, 300, 150));
-        targets.add(new Target(15, 400, 150));
-        targets.add(new Target(15, 230, 150));
-        targets.add(new Target(15, 330, 150));
-        targets.add(new Target(15, 430, 150));
-        targets.add(new Target(15, 260, 150));
-        targets.add(new Target(15, 360, 150));
-        targets.add(new Target(15, 460, 150));
-
+        // load sprites textures for the map.
+        for(String spriteName : texture) {
+            this.mapSprites.put(spriteName, sprites.createSprite(spriteName));
+        }
     }
 
     public ArrayList<Block> getMap() {
         return blocks;
     }
     public ArrayList<Target> getTargets() { return targets; }
-
     public int getSize() {
         return blocks.size();
     }
-
     public void destroyTarget(Target target) {
         targets.remove(target);
     }
 
+    public void draw(Batch batch) {
+        drawBlocks(batch);
+        drawEntity(batch);
+    }
+    private void drawBlocks(Batch batch) {
+        for(Block blk : this.blocks) {
+            Sprite sprite = getSprite(blk.getType());
+            batch.draw(sprite, blk.getX(), blk.getY(), blk.getBlockWidth(), blk.getBlockHeight());
+        }
+    }
+    private void drawEntity(Batch batch) {
+        for(Target target : this.targets) {
+            Sprite sprite = getSprite("target");
+            batch.draw(sprite, target.getX(), target.getY(), target.getSize(), target.getSize());
+        }
+    }
 
+    private Sprite getSprite(String name) {
+        return mapSprites.get(name);
+    }
     // Helper function
     private String[] getBlockInfo(String line)
     {

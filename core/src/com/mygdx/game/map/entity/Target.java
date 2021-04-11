@@ -1,4 +1,4 @@
-package com.mygdx.game.entity;
+package com.mygdx.game.map.entity;
 
 import java.lang.Math;
 

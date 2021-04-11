@@ -2,6 +2,7 @@ package com.mygdx.game.player;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.player.PlayerInput.playerActions;
 import com.mygdx.game.player.PlayerAttack.Attack;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,7 +13,6 @@ import javax.xml.soap.Text;
 /*
 ####################################################################################################
 TODO:
-- Sprites/Visuals
 - Sound
 ####################################################################################################
 */
@@ -27,14 +27,12 @@ the player is taking. It is found combining the playerState with the playerActio
 */
 
 public class Player {
-
-    private enum playerState {      // A list of states the player could be in.
+    private enum playerState {
         NEUTRAL,
         INAIR,
         ATTACKGROUND,
         ATTACKAIR
     }
-
     private enum playerAnimation {
         STANDING,
         WALKING,
@@ -46,38 +44,40 @@ public class Player {
         JUMPING,
         FALLING
     }
-
     private enum Direction {
         LEFT,
         RIGHT
     }
 
     // Player Information
-    private PlayerInput playerIn = new PlayerInput();
+    private PlayerInput input = new PlayerInput();
     private playerState state = playerState.NEUTRAL;
-    private playerState prevState = playerState.NEUTRAL;
     private playerAnimation currAnimation = playerAnimation.STANDING;
     private playerAnimation prevAnimation = playerAnimation.STANDING;
-    private Direction playerDirection = Direction.LEFT;
+    private Direction player_direction = Direction.LEFT;
     private float posX;
     private float posY;
     private float height = 50;
     private float width = 50;
-    private int stateTime = 0;
+    private float hitbox_height;
+    private float hitbox_width;
+    private int state_time = 0;
+    private PlayerAttack att;
+
+    private final float MODEL_SCALE_DIFFERENCE = 0.3f;
+    private final int FRAMES_PER_ANIMATION = 6;
 
     // Player Sprite Animations
-    String dir = System.getProperty("user.dir") + "/";
-    private TextureAtlas playerSprites = new TextureAtlas(dir+"playersprites.txt");
-
-    private Sprite[] neutralAnimation = new Sprite[1];
-    private Sprite[] jumpAnimation = new Sprite[1];
-    private Sprite[] fallAnimation = new Sprite[1];
-    private Sprite[] walkAnimation = new Sprite[6];
-    private Sprite[] runAnimation = new Sprite[4];
-    private Sprite[] attackAnimation = new Sprite[10];
-    private Sprite[] attackUpAnimation = new Sprite[9];
-    private Sprite[] attackAirAnimation = new Sprite[6];
-    private Sprite[] attackAirUpAnimation = new Sprite[5];
+    private TextureAtlas playerSprites;
+    private final Sprite[] neutralAnimation = new Sprite[1];
+    private final Sprite[] jumpAnimation = new Sprite[1];
+    private final Sprite[] fallAnimation = new Sprite[1];
+    private final Sprite[] walkAnimation = new Sprite[6];
+    private final Sprite[] runAnimation = new Sprite[4];
+    private final Sprite[] attackAnimation = new Sprite[10];
+    private final Sprite[] attackUpAnimation = new Sprite[9];
+    private final Sprite[] attackAirAnimation = new Sprite[6];
+    private final Sprite[] attackAirUpAnimation = new Sprite[5];
 
     // Player Jump Mechanic
     private final float MAX_JUMP_HEIGHT = this.height / 5;
@@ -85,25 +85,28 @@ public class Player {
     private final float INITIAL_JUMP_VELOCITY = 2*MAX_JUMP_TIME;
     private final float MAX_FALL_SPEED = this.height / 10;
     private float jumpVelocity = 0;
-    private float gravity;
 
     // Player Running Mechanics
     private final float MAX_RUN_SPEED = 3.5f;
-    private float runSpeed = 0;
     private final float ACCELERATION_SPEED = 0.5f;
     private final float DECELERATION_SPEED = 0.2f;
-
-    private PlayerAttack att;
+    private float runSpeed = 0;
 
     // Constructors
     public Player(TextureAtlas sprites) {
         this.posX = 0;
         this.posY = 0;
+        this.playerSprites = sprites;
+        this.hitbox_height = this.height*MODEL_SCALE_DIFFERENCE;
+        this.hitbox_width = this.width*MODEL_SCALE_DIFFERENCE;
         getAnimations();
     }
     public Player(float posX, float posY, TextureAtlas sprites) {
         this.posX = posX;
         this.posY = posY;
+        this.playerSprites = sprites;
+        this.hitbox_height = this.height*MODEL_SCALE_DIFFERENCE;
+        this.hitbox_width = this.width*MODEL_SCALE_DIFFERENCE;
         getAnimations();
     }
     public Player(float posX, float posY, float height, float width, TextureAtlas sprites) {
@@ -111,6 +114,9 @@ public class Player {
         this.posY = posY;
         this.height = height;
         this.width = width;
+        this.playerSprites = sprites;
+        this.hitbox_height = this.height*MODEL_SCALE_DIFFERENCE;
+        this.hitbox_width = this.width*MODEL_SCALE_DIFFERENCE;
         getAnimations();
     }
 
@@ -119,31 +125,25 @@ public class Player {
     public float getPosY() { return this.posY; }
     public float getHeight() { return this.height; }
     public float getWidth() { return this.width; }
+    public float getHitboxHeight() { return hitbox_height; }
+    public float getHitboxWidth() { return hitbox_width; }
     public float getJumpHeight() { return MAX_JUMP_HEIGHT; }
-    public float getJumpTime() {return MAX_JUMP_TIME; }
+    public float getJumpTime() { return MAX_JUMP_TIME; }
+    public float getAnimationDiff() { return MODEL_SCALE_DIFFERENCE; }
 
     // Setters
     public void setPosX(float x) { this.posX = x; }
     public void setPosY(float y) { this.posY = y; }
     public void setInAir(boolean bool) {
-        if (isMidGroundAttack())
+        if(isMidGroundAttack())
             return;
-        else if (bool == false)
+        else if(bool == false)
             this.state = playerState.NEUTRAL;
         else if(isMidAirAttack())
             return;
-        else {
+        else
             this.state = playerState.INAIR;
-        }
     }
-
-    public void setJumpVelocity(float v) { this.jumpVelocity = v; }
-    public void setGravity(float g) { this.gravity = g; }
-
-    protected void addToPosX(float x) {
-        this.posX += x;
-    }
-    protected void addToPosY(float y) { this.posY += y; }
 
     // Checking player states
     public boolean isInAir() { return (state == playerState.INAIR); }
@@ -151,14 +151,18 @@ public class Player {
     public boolean isMidGroundAttack() { return (state == playerState.ATTACKGROUND); }
     public boolean isMidAirAttack() { return (state == playerState.ATTACKAIR); }
 
-    public void doAction(boolean[] in) {
-        playerActions action = this.playerIn.getAction(in);
+    public void setJumpVelocity(float v) { this.jumpVelocity = v; }
+    protected void addToPosX(float x) { this.posX += x; }
+    protected void addToPosY(float y) { this.posY += y; }
+
+    public void doAction(boolean[] in, float gravity) {
+        playerActions action = this.input.getAction(in);
         switch(action) {
             case DONOTHING:
                 doNothing();
                 break;
             case JUMP:
-                jump();
+                jump(gravity);
                 break;
             case MOVELEFT:
                 moveLeft();
@@ -188,7 +192,7 @@ public class Player {
         if(!isInAir() && !isMidAirAttack() && !isMidGroundAttack()) {
             currAnimation = playerAnimation.RUNNING;
             this.runSpeed -= ACCELERATION_SPEED;
-            this.playerDirection = Direction.LEFT;
+            this.player_direction = Direction.LEFT;
             if(this.runSpeed < -this.MAX_RUN_SPEED)
                 this.runSpeed = -this.MAX_RUN_SPEED;
         }
@@ -197,18 +201,18 @@ public class Player {
         if(!isInAir() && !isMidAirAttack() && !isMidGroundAttack()) {
             currAnimation = playerAnimation.RUNNING;
             this.runSpeed += ACCELERATION_SPEED;
-            this.playerDirection = Direction.RIGHT;
+            this.player_direction = Direction.RIGHT;
             if(this.runSpeed > this.MAX_RUN_SPEED) { this.runSpeed = this.MAX_RUN_SPEED; }
         }
     }
-    private void jump() {
+    private void jump(float gravity) {
         if(!isInAir() && !isMidGroundAttack() && !isMidAirAttack()) {
             currAnimation = playerAnimation.JUMPING;
-            jumpAction(this.gravity);
-            posY++;        // Added to treat player an an object in the air.
+            jumpAction(gravity);
+            this.posY++;        // Added to treat player an an object in the air.
         }
     }
-    public void jumpAction(float gravity) {
+    protected void jumpAction(float gravity) {
         this.jumpVelocity = this.INITIAL_JUMP_VELOCITY + gravity;
         this.state = playerState.INAIR;
         return;
@@ -244,14 +248,15 @@ public class Player {
 
     // Functions to update the player.
     public void applyFalling(float newY) {
-        if(newY > this.posY && isInAir()) {
+        if(newY > getPosY() && isInAir()) {
             currAnimation = playerAnimation.FALLING;
         }
     }
     public void applyGravity(float g) {
         this.jumpVelocity += g;
 
-        if(this.jumpVelocity > this.MAX_FALL_SPEED) this.posY += this.MAX_FALL_SPEED;
+        if(this.jumpVelocity > this.MAX_FALL_SPEED)
+            this.posY += this.MAX_FALL_SPEED;
         else addToPosY(this.jumpVelocity);
     }
     public void applyMomentum() { // Applying Deceleration
@@ -265,8 +270,7 @@ public class Player {
         }
         addToPosX(this.runSpeed);
     }
-
-    public boolean applyAttack() {
+    public boolean canAttack() {
         if(!isMidAirAttack() && !isMidGroundAttack()) {
             return false;
         }
@@ -278,7 +282,7 @@ public class Player {
         return true;
     }
     public AttackFrame getAttackFrame() {
-        boolean facingRight = this.playerDirection == playerDirection.RIGHT;
+        boolean facingRight = this.player_direction == player_direction.RIGHT;
         AttackFrame hitboxData = this.att.getNext(this.width, facingRight);
         return hitboxData;
     }
@@ -286,9 +290,9 @@ public class Player {
     public void draw(Batch batch) {
         // Check to restart or continue animation.
         if(isSameAnimation())
-            this.stateTime++;
+            this.state_time++;
         else
-            stateTime = 0;
+            state_time = 0;
 
         // Get the correct animation for the action.
         Sprite[] animationInfo;
@@ -316,21 +320,17 @@ public class Player {
                 break;
             default:
                 animationInfo = neutralAnimation;
-
         }
 
         // Draw with correct frames.
-        boolean flip = (playerDirection == Direction.RIGHT);
-        int numOfFrames;
-        numOfFrames = animationInfo.length*6;
-        int frame = stateTime % numOfFrames;
-        batch.draw(animationInfo[frame/6],
-                flip ? posX+width : posX,
-                posY,
+        boolean flip = (player_direction == Direction.RIGHT);
+        int numOfFrames = animationInfo.length*FRAMES_PER_ANIMATION;
+        int frame = state_time % numOfFrames;
+        batch.draw(animationInfo[frame/FRAMES_PER_ANIMATION],
+                flip ? getPosX() + width : getPosX(),
+                getPosY(),
                 flip ? -width : width,
                 height);
-
-        prevState = state;
         prevAnimation = currAnimation;
     }
 
