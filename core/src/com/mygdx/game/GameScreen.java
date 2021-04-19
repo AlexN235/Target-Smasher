@@ -6,15 +6,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 // local class imports
 import com.mygdx.game.map.Map;
 import com.mygdx.game.map.blocks.Block;
 import com.mygdx.game.map.entity.Target;
-import com.mygdx.game.player.Player;
+import com.mygdx.game.player.Cless;
 import com.mygdx.game.player.AttackFrame;
 
 // regular imports
@@ -23,19 +20,15 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.soap.Text;
-
 public class GameScreen extends ScreenAdapter {
+
     MainGame game;
 
     private com.mygdx.game.map.Map map;
     private com.mygdx.game.player.Player player;
     private float map_gravity;
-
-    private float map_height;
-    private float map_width;
-
-    private Texture background1;
+    private float SPRITE_ATTACK_OFFSET;
+    private Texture[] background;
 
     public GameScreen(MainGame game) {
         this.game = game;
@@ -51,19 +44,27 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // Player
-        player = new Player(300, 300, this.game.player_texture);
+        player = new Cless(300, 150, this.game.player_texture);
         map_gravity = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2);
+        SPRITE_ATTACK_OFFSET = player.getWidth()*-0.12f;
 
         // Background images
-        background1 = new Texture(this.game.getSpriteDirectory("background1.png"));
+        background = new Texture[4];
+        for(int i=0; i<4; i++)
+            background[i] = new Texture(this.game.getSpriteDirectory("background" + String.valueOf(i+1) + ".png"));
 
         Gdx.graphics.setWindowedMode(800,640);
-        map_height = this.game.viewport.getScreenHeight();
-        map_width = this.game.viewport.getScreenWidth();
+        float map_height = this.game.viewport.getWorldHeight();
+        float map_width = this.game.viewport.getWorldWidth();
+        map.setBoundary(map_width, map_height);
     }
 
     @Override
     public void render(float delta) {
+        // Game condition check
+        if(map.noTargetsLeft())
+            this.game.setScreen(new EndScreen(this.game));
+
         Gdx.gl.glClearColor(.57f, .77f, .85f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -99,9 +100,8 @@ public class GameScreen extends ScreenAdapter {
         updatePlayerAttacks();
 
         // Render Map/Player/Entities
-
         this.game.batch.begin();
-        this.game.batch.draw(background1, 0.0f,0.0f, 800, 640);
+        drawBackground();
         player.draw(this.game.batch);
         map.draw(this.game.batch);
         this.game.batch.end();
@@ -113,20 +113,7 @@ public class GameScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(null);
     }
 
-    // Helper function : Check if location is outside of the boundary
-    private boolean outOfBoundary(float x, float y) {
-        if(x > Gdx.graphics.getWidth() || x > Gdx.graphics.getHeight()) return true;
-        else return x < 0 || y < 0;
-    }
-
-    // Helper function : Checks if player is in range to be affected by a block/entity.
-    private boolean playerInRange(float playerSideOne, float playerSideTwo, float sideOne, float sideTwo) {
-        boolean inRange = (playerSideTwo > sideOne) && (playerSideOne < sideTwo);
-        return inRange;
-    }
-
-
-    // Helper function : Check if player hits a wall
+    // Helper functions : Check if player hits a wall
     private boolean hitTopWall(float oldY, float newX, float newY, Block block) {
         float wallTop = block.getTopSideLocation() - player.getHitboxHeight();
         float block_left_side = block.getLeftSideLocation() + player.getHitboxWidth();
@@ -164,10 +151,15 @@ public class GameScreen extends ScreenAdapter {
         }
         return false;
     }
+    private boolean playerInRange(float playerSideOne, float playerSideTwo, float sideOne, float sideTwo) {
+        // Helper function : Checks if player is in range to be affected by a block/entity.
+        boolean inRange = (playerSideTwo > sideOne) && (playerSideOne < sideTwo);
+        return inRange;
+    }
 
 
-    // Helper Function : update player based on wall collision
     private void updatePlayerWallCollision(float newX, float newY) {
+        // Helper Function : update player based on wall collision
         for(Block blk : map.getMap()) {
             if(hitTopWall(newY, player.getPosX(), player.getPosY(), blk)) {
                 player.setPosY(blk.getTopSideLocation() - player.getHitboxHeight());
@@ -182,11 +174,18 @@ public class GameScreen extends ScreenAdapter {
                 player.setPosX(blk.getRightSideLocation() - player.getHitboxWidth());
             }
         }
+        for(Block blk : map.getBoundary()) {
+            if(hitLeftWall(newX, player.getPosX(), player.getPosY(), blk)) {
+                player.setPosX(blk.getLeftSideLocation()-player.getWidth()+player.getHitboxWidth());
+            }
+            if(hitRightWall(newX, player.getPosX(), player.getPosY(), blk)) {
+                player.setPosX(blk.getRightSideLocation() - player.getHitboxWidth());
+            }
+        }
     }
 
-
-    // Helper Function : update player based on whether player is on the ground or air.
     private void updatePlayerOnGround() {
+        // Helper Function : update player based on whether player is on the ground or air.
         float player_hitboxX = player.getPosX();
         float player_hitboxY = player.getPosY() + player.getHitboxHeight();
         for(Block blk : map.getMap()) {
@@ -202,16 +201,15 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-
-    // Helper Function : update player/map based on player attack actions.
     private void updatePlayerAttacks() {
+        // Helper Function : Update player/map based on player attack actions.
         float hitboxX, hitboxY, hitboxSize;
         AttackFrame playerAttData = null;
         if(player.canAttack())
             playerAttData = player.getAttackFrame();
         if(playerAttData != null) {
             if(!playerAttData.isEmptyFrame()) {
-                hitboxX = player.getPosX() + playerAttData.getPosX();
+                hitboxX = player.getPosX() + playerAttData.getPosX() + SPRITE_ATTACK_OFFSET;
                 hitboxY = player.getPosY() + playerAttData.getPosY()*player.getAnimationDiff();
                 hitboxSize = playerAttData.getSize();
 
@@ -225,4 +223,13 @@ public class GameScreen extends ScreenAdapter {
             }
         }
     }
+
+    private void drawBackground() {
+        // Helper function : draws the background for the map.
+        this.game.batch.draw(background[0], 0.0f,0.0f, 800, 640);
+        this.game.batch.draw(background[1], 0.0f,0.0f, 800, 240);
+        this.game.batch.draw(background[2], 0.0f,0.0f, 800, 640);
+        this.game.batch.draw(background[3], 0.0f,0.0f, 800, 240);
+    }
+
 }

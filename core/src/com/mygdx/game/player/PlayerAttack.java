@@ -6,6 +6,7 @@ import java.util.Set;
 import com.mygdx.game.player.AttackFrame.*;
 
 public class PlayerAttack {
+
     protected enum Attack {
         Basic,
         BasicUp,
@@ -75,10 +76,10 @@ public class PlayerAttack {
         this.totalAttackFrame = 30;
 
         for(int i=0;i<=totalAttackFrame;i++) {
-            if(i<13)
+            if(i<17)
                 attTimeInfo.put(i, new AttackFrame());
-            if(i>=13 && i<15)
-                attTimeInfo.put(i , new AttackFrame(-0.35f*playerWidth, 1.4f*playerHeight, playerWidth*0.02f));
+            if(i>=17 && i<19)
+                attTimeInfo.put(i , new AttackFrame(-0.2f*playerWidth, 1.4f*playerHeight, playerWidth*0.0001f));
             else
                 attTimeInfo.put(i, new AttackFrame());
         }
@@ -91,7 +92,7 @@ public class PlayerAttack {
             if(i<13)
                 attTimeInfo.put(i, new AttackFrame());
             else if(i>=13 &&i<25)
-                attTimeInfo.put(i, new AttackFrame(-0.35f*playerWidth, playerHeight*2.0f, playerWidth*0.02f));
+                attTimeInfo.put(i, new AttackFrame(-0.15f*playerWidth, playerHeight*2.0f, playerWidth*0.0001f));
             else
                 attTimeInfo.put(i, new AttackFrame());
         }
@@ -102,10 +103,10 @@ public class PlayerAttack {
         this.totalAttackFrame = 36;
 
         for(int i=0; i<=totalAttackFrame;i++) {
-            if(i<11)
+            if(i<18)
                 attTimeInfo.put(i, new AttackFrame());
-            else if(i>=11 &&i<13)
-                attTimeInfo.put(i, new AttackFrame(-0.3f*playerWidth, 0.3f*playerHeight, playerWidth*0.02f));
+            else if(i>=18 && i<21)
+                attTimeInfo.put(i, new AttackFrame(-0.3f*playerWidth, 0.6f*playerHeight, playerWidth*0.0001f));
             else
                 attTimeInfo.put(i, new AttackFrame());
         }
@@ -116,10 +117,10 @@ public class PlayerAttack {
         this.totalAttackFrame = 30;
 
         for(int i=0; i<=totalAttackFrame;i++) {
-            if(i<13)
+            if(i<15)
                 attTimeInfo.put(i, new AttackFrame());
-            else if(i>=13 && i<19)
-                attTimeInfo.put(i, new AttackFrame(-0.5f*playerWidth, 1.7f*playerHeight, playerWidth*0.02f));
+            else if(i>=15 && i<18)
+                attTimeInfo.put(i, new AttackFrame(-0.5f*playerWidth, 2.0f*playerHeight, playerWidth*0.0001f));
             else
                 attTimeInfo.put(i, new AttackFrame());
         }

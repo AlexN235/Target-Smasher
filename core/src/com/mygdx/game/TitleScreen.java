@@ -3,19 +3,16 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class TitleScreen extends ScreenAdapter {
+
     MainGame game;
-    private final Vector2 mouse_position = new Vector2();
-    private final float button_height = 50;
-    private final float button_width = 100;
-    private final float button_x = 275;
-    private final float button_y  = 275;
+    private float text_x;
+    private float text_y ;
+    private BitmapFont font;
 
     public TitleScreen(MainGame game) {
         this.game = game;
@@ -32,23 +29,29 @@ public class TitleScreen extends ScreenAdapter {
                 return true;
             }
         });
+        this.text_x = this.game.viewport.getWorldWidth()/6;
+        this.text_y = this.game.viewport.getWorldHeight()/1.5f;
+        font = new BitmapFont();
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(.57f, .77f, .85f, 1);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        mouse_position.x = Gdx.input.getX();
-        mouse_position.y = Gdx.input.getY();
-        float world_height = this.game.viewport.getScreenHeight();
-        boolean check_mouse_x = mouse_position.x > button_x && mouse_position.x < button_x+button_width;
-        boolean check_mouse_y = (world_height-mouse_position.y) > button_y && (world_height-mouse_position.y) < button_y+button_height;
-        if(check_mouse_x && check_mouse_y) {
-            this.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-            this.game.shape_renderer.rect(button_x, button_y, button_width, button_height);
-        }
-        this.game.shape_renderer.end();
+        float line_difference = this.game.viewport.getWorldHeight()/10;
+
+        this.game.batch.begin();
+        //this.game.batch.setProjectionMatrix(this.game.camera.combined);
+        font.setColor(1, .5f, .5f, 1);
+        font.draw(this.game.batch, "Target Smasher!", this.game.viewport.getWorldHeight()/2.5f, this.text_y);
+        font.setColor(1, 1, 1, 1);
+        font.draw(this.game.batch, "Click on the screen to start.", this.text_x, this.text_y-line_difference);
+        font.draw(this.game.batch, "W A S D to Move", this.text_x, this.text_y-line_difference*2);
+        font.draw(this.game.batch, "K to attack", this.text_x, this.text_y-line_difference*3);
+        font.draw(this.game.batch, "L to Jump", this.text_x, this.text_y-line_difference*4);
+
+        this.game.batch.end();
     }
 
     @Override

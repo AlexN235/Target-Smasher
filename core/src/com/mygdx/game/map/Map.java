@@ -25,8 +25,10 @@ import java.io.File;
 //import com.mygdx.game.map.maps.*;
 
 public class Map {
+
     // Potential have different types of blocks or blocks within a certain location to save time searching/rendering.
     private ArrayList<Block> blocks = new ArrayList<Block>();
+    private ArrayList<Block> boundary = new ArrayList<Block>();
     private ArrayList<Target> targets = new ArrayList<Target>();
     private HashMap<String, Sprite> mapSprites = new HashMap<String, Sprite>();
 
@@ -52,7 +54,7 @@ public class Map {
             String blockType = blockInfo[4];
 
             if(blockType.equals("target"))
-                this.targets.add(new Target(height,8, x-200, y-30));
+                this.targets.add(new Target(height,8, x, y));
             else
                 this.blocks.add(new Block(x, y, blockType, height, width));
 
@@ -66,10 +68,17 @@ public class Map {
             this.mapSprites.put(spriteName, sprites.createSprite(spriteName));
         }
     }
+    public void setBoundary(float map_width, float map_height) {
+        Block left_boundary = new Block(0, 0, "boundary", map_height, 1);
+        Block right_boundary = new Block(map_width, 0, "boundary", map_height, 1);
+        this.boundary.add(left_boundary);
+        this.boundary.add(right_boundary);
+    }
 
     public ArrayList<Block> getMap() {
         return blocks;
     }
+    public ArrayList<Block> getBoundary() { return boundary; }
     public ArrayList<Target> getTargets() { return targets; }
     public int getSize() {
         return blocks.size();
@@ -102,5 +111,9 @@ public class Map {
     private String[] getBlockInfo(String line)
     {
         return line.split(" ");
+    }
+
+    public boolean noTargetsLeft() {
+        return this.targets.isEmpty();
     }
 }
