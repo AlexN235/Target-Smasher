@@ -13,14 +13,14 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 public class MainGame extends Game {
 
 	// Renderer
-	ShapeRenderer shape_renderer;
-	SpriteBatch batch;
-	TextureAtlas map_texture;
-	TextureAtlas player_texture;
+	protected ShapeRenderer shape_renderer;
+	protected SpriteBatch batch;
+	protected TextureAtlas map_texture;
+	protected TextureAtlas player_texture;
 
 	// Camera
-	OrthographicCamera camera;
-	StretchViewport viewport;
+	protected OrthographicCamera camera;
+	protected StretchViewport viewport;
 
 	@Override
 	public void create () {

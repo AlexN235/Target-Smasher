@@ -73,11 +73,6 @@ public class GameScreen extends ScreenAdapter {
         preRenderPosX = player.getPosX();
         preRenderPosY = player.getPosY();
 
-        // Update player (gravity, momentum, air state)
-        player.applyGravity(map_gravity);
-        player.applyMomentum();
-        player.applyFalling(preRenderPosY);
-
         // Player Input
         boolean[] input = new boolean[8];
         if (Gdx.input.isKeyPressed(Input.Keys.W))
@@ -92,7 +87,12 @@ public class GameScreen extends ScreenAdapter {
             input[3] = true;
         if (Gdx.input.isKeyPressed(Input.Keys.K))
             input[2] = true;
+
+        // Update player (gravity, momentum, air state)
         player.doAction(input, map_gravity);
+        player.applyGravity(map_gravity);
+        player.applyMomentum();
+        player.applyFalling(preRenderPosY);
 
         // Checks/Update player's action/affects on environment
         updatePlayerWallCollision(preRenderPosX, preRenderPosY);
