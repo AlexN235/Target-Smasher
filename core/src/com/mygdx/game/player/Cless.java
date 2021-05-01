@@ -1,8 +1,6 @@
 package com.mygdx.game.player;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;

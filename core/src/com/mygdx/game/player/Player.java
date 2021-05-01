@@ -2,13 +2,9 @@ package com.mygdx.game.player;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.player.PlayerInput.playerActions;
 import com.mygdx.game.player.PlayerAttack.Attack;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-
-import javax.xml.soap.Text;
 
 /*
 ####################################################################################################

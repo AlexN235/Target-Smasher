@@ -1,9 +1,6 @@
 package com.mygdx.game.player;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
-import com.mygdx.game.player.AttackFrame.*;
 
 public class PlayerAttack {
 
