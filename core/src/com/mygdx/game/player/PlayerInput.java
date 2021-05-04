@@ -2,15 +2,6 @@ package com.mygdx.game.player;
 
 public class PlayerInput {
 
-    public static void main(String[] args) {
-        boolean[] in = new boolean[8];
-
-        in[7] = true;
-
-        PlayerInput p = new PlayerInput();
-        System.out.println(p.boolToByte(in));
-        System.out.println(p.getAction(in));
-    }
     protected enum playerActions {    // A list of all actions the players could take.
         DONOTHING,
         MOVELEFT,

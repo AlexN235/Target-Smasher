@@ -51,13 +51,13 @@ public class MainGame extends Game {
 	}
 
 	// Helper function : Get directory for files used by game.
-	protected String getSpriteDirectory(String sprite_file) {
-		return System.getProperty("user.dir") + "\\" + sprite_file;
+	protected String getSpriteDirectory(String filename) {
+		return System.getProperty("user.dir") + "\\" + filename;
 	}
-	protected String getMapDirectory(String map_file) {
+	protected String getMapDirectory(String filename) {
 		String dir = System.getProperty("user.dir");
 		String path = "/core/src/com/mygdx/game/map/maps/";
-		return (dir.substring(0, dir.length()-15) + path + map_file);
+		return (dir.substring(0, dir.length()-15) + path + filename);
 	}
 
 }

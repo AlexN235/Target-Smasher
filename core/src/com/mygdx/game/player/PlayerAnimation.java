@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 public class PlayerAnimation {
 
-    protected TextureAtlas playerSprites;
+    private TextureAtlas playerSprites;
     protected Sprite[] neutralAnimation;
     protected Sprite[] jumpAnimation;
     protected Sprite[] fallAnimation;
@@ -32,7 +32,7 @@ public class PlayerAnimation {
         attackUpAnimation = new Sprite[it.next()];
         attackAirAnimation = new Sprite[it.next()];
         attackAirUpAnimation = new Sprite[it.next()];
-        getAnimations();
+        createAnimations();
     }
 
     // Getters
@@ -64,7 +64,7 @@ public class PlayerAnimation {
         return attackAirUpAnimation;
     }
 
-    private void getAnimations() {
+    private void createAnimations() {
         neutralAnimation[0] = playerSprites.createSprite("standing");
         fallAnimation[0] = playerSprites.createSprite("falling");
         jumpAnimation[0] = playerSprites.createSprite("jumping");

@@ -13,6 +13,7 @@ import com.mygdx.game.map.blocks.Block;
 import com.mygdx.game.map.entity.Target;
 import com.mygdx.game.player.Cless;
 import com.mygdx.game.player.AttackFrame;
+import com.mygdx.game.player.Player;
 
 // regular imports
 import java.io.FileNotFoundException;
@@ -24,10 +25,10 @@ public class GameScreen extends ScreenAdapter {
 
     MainGame game;
 
-    private com.mygdx.game.map.Map map;
-    private com.mygdx.game.player.Player player;
-    private float map_gravity;
-    private float SPRITE_ATTACK_OFFSET;
+    private Map map;
+    private Player player;
+    private float mapGravity;
+    private float spriteAttackOffset;
     private Texture[] background;
 
     public GameScreen(MainGame game) {
@@ -45,8 +46,8 @@ public class GameScreen extends ScreenAdapter {
 
         // Player
         player = new Cless(300, 150, this.game.player_texture);
-        map_gravity = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2);
-        SPRITE_ATTACK_OFFSET = player.getWidth()*-0.12f;
+        mapGravity = (-2*player.getJumpHeight()) / (float)Math.pow(player.getJumpTime() , 2);
+        spriteAttackOffset = player.getWidth()*-0.12f;
 
         // Background images
         background = new Texture[4];
@@ -63,10 +64,7 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         // Game condition check
         if(map.noTargetsLeft())
-            this.game.setScreen(new EndScreen(this.game));
-
-        Gdx.gl.glClearColor(.57f, .77f, .85f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            game.setScreen(new EndScreen(game));
 
         // Keep track of the previous position
         float preRenderPosX, preRenderPosY;
@@ -89,8 +87,8 @@ public class GameScreen extends ScreenAdapter {
             input[2] = true;
 
         // Update player (gravity, momentum, air state)
-        player.doAction(input, map_gravity);
-        player.applyGravity(map_gravity);
+        player.doAction(input, mapGravity);
+        player.applyGravity(mapGravity);
         player.applyMomentum();
         player.applyFalling(preRenderPosY);
 
@@ -100,12 +98,12 @@ public class GameScreen extends ScreenAdapter {
         updatePlayerAttacks();
 
         // Render Map/Player/Entities
-        this.game.batch.begin();
+        game.batch.begin();
         drawBackground();
         player.draw(this.game.batch);
         map.draw(this.game.batch);
-        this.game.batch.end();
-        this.game.shape_renderer.end();
+        game.batch.end();
+        game.shape_renderer.end();
     }
 
     @Override
@@ -209,7 +207,7 @@ public class GameScreen extends ScreenAdapter {
             playerAttData = player.getAttackFrame();
         if(playerAttData != null) {
             if(!playerAttData.isEmptyFrame()) {
-                hitboxX = player.getPosX() + playerAttData.getPosX() + SPRITE_ATTACK_OFFSET;
+                hitboxX = player.getPosX() + playerAttData.getPosX() + spriteAttackOffset;
                 hitboxY = player.getPosY() + playerAttData.getPosY()*player.getAnimationDiff();
                 hitboxSize = playerAttData.getSize();
 

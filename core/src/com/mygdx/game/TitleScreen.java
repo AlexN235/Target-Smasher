@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 public class TitleScreen extends ScreenAdapter {
 
     MainGame game;
-    private float text_x;
-    private float text_y ;
+    private float textX;
+    private float textY ;
     private BitmapFont font;
 
     public TitleScreen(MainGame game) {
@@ -29,8 +29,8 @@ public class TitleScreen extends ScreenAdapter {
                 return true;
             }
         });
-        this.text_x = this.game.viewport.getWorldWidth()/6;
-        this.text_y = this.game.viewport.getWorldHeight()/1.5f;
+        this.textX = this.game.viewport.getWorldWidth()/6;
+        this.textY = this.game.viewport.getWorldHeight()/1.5f;
         font = new BitmapFont();
     }
 
@@ -39,19 +39,19 @@ public class TitleScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        float line_difference = this.game.viewport.getWorldHeight()/10;
+        float line_difference = game.viewport.getWorldHeight()/10;
 
-        this.game.batch.begin();
+        game.batch.begin();
         //this.game.batch.setProjectionMatrix(this.game.camera.combined);
         font.setColor(1, .5f, .5f, 1);
-        font.draw(this.game.batch, "Target Smasher!", this.game.viewport.getWorldHeight()/2.5f, this.text_y);
+        font.draw(game.batch, "Target Smasher!", this.game.viewport.getWorldHeight()/2.5f, this.textY);
         font.setColor(1, 1, 1, 1);
-        font.draw(this.game.batch, "Click on the screen to start.", this.text_x, this.text_y-line_difference);
-        font.draw(this.game.batch, "W A S D to Move", this.text_x, this.text_y-line_difference*2);
-        font.draw(this.game.batch, "K to attack", this.text_x, this.text_y-line_difference*3);
-        font.draw(this.game.batch, "L to Jump", this.text_x, this.text_y-line_difference*4);
+        font.draw(game.batch, "Click on the screen to start.", textX, textY-line_difference);
+        font.draw(game.batch, "W A S D to Move", textX, textY-line_difference*2);
+        font.draw(game.batch, "K to attack", textX, textY-line_difference*3);
+        font.draw(game.batch, "L to Jump", textX, textY-line_difference*4);
 
-        this.game.batch.end();
+        game.batch.end();
     }
 
     @Override

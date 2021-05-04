@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 public class EndScreen extends ScreenAdapter {
 
     MainGame game;
-    private float text_x;
-    private float text_y ;
+    private float textX;
+    private float textY ;
     private BitmapFont font;
 
     public EndScreen(MainGame game) {
@@ -29,8 +29,8 @@ public class EndScreen extends ScreenAdapter {
                 return true;
             }
         });
-        this.text_x = this.game.viewport.getWorldWidth()/6;
-        this.text_y = this.game.viewport.getWorldHeight()/1.5f;
+        this.textX = this.game.viewport.getWorldWidth()/6;
+        this.textY = this.game.viewport.getWorldHeight()/1.5f;
         font = new BitmapFont();
     }
 
@@ -39,14 +39,14 @@ public class EndScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        float line_difference = this.game.viewport.getWorldHeight()/10;
+        float line_difference = game.viewport.getWorldHeight()/10;
 
-        this.game.batch.begin();
+        game.batch.begin();
         //this.game.batch.setProjectionMatrix(this.game.camera.combined);
         font.setColor(1, .5f, .5f, 1);
-        font.draw(this.game.batch, "Game Ended", this.game.viewport.getWorldHeight()/2.5f, this.text_y);
-        font.draw(this.game.batch, "Click on screen the to play again.", this.text_x, this.text_y-line_difference);
-        this.game.batch.end();
+        font.draw(game.batch, "Game Ended", this.game.viewport.getWorldHeight()/2.5f, this.textY);
+        font.draw(game.batch, "Click on the screen to play again.", textX, this.textY-line_difference);
+        game.batch.end();
     }
 
     @Override

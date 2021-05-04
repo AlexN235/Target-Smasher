@@ -40,18 +40,14 @@ public class Player {
 
     // Player Information
     protected PlayerInput input = new PlayerInput();
+    protected PlayerPosition playerPosition;
+    protected PlayerAttack att;
+    protected int stateTime = 0;
+
     protected playerState state = playerState.NEUTRAL;
     protected playerAnimationState currAnimation = playerAnimationState.STANDING;
     protected playerAnimationState prevAnimation = playerAnimationState.STANDING;
-    protected direction player_direction = direction.LEFT;
-    protected float posX;
-    protected float posY;
-    protected float height = 50;
-    protected float width = 50;
-    protected float hitbox_height;
-    protected float hitbox_width;
-    protected int state_time = 0;
-    protected PlayerAttack att;
+    protected direction playerDirection = direction.LEFT;
 
     protected final float MODEL_SCALE_DIFFERENCE = 0.3f; // For scaling down hitbox from total animation size.
     protected final int FRAMES_PER_ANIMATION = 6;
@@ -60,66 +56,45 @@ public class Player {
     protected TextureAtlas playerSprites;
     protected PlayerAnimation playerAnimation;
 
-    // Player Jump Mechanic
-    private final float MAX_JUMP_HEIGHT = height / 5;
-    private final float MAX_JUMP_TIME = 6.5f;
-    private final float INITIAL_JUMP_VELOCITY = 2*MAX_JUMP_TIME;
-    private final float MAX_FALL_SPEED = height / 10;
-    private float jumpVelocity = 0;
-
-    // Player Running Mechanics
-    private final float MAX_RUN_SPEED = 3.5f;
-    private final float ACCELERATION_SPEED = 0.5f;
-    private final float DECELERATION_SPEED = 0.2f;
-    private float runSpeed = 0;
-
     // Constructors
     public Player() {
         // Need a default player animation set (game will fail if called).
-        posX = 0;
-        posY = 0;
-        hitbox_height = height*MODEL_SCALE_DIFFERENCE;
-        hitbox_width = width*MODEL_SCALE_DIFFERENCE;
     }
     public Player(TextureAtlas sprites) {
-        posX = 0;
-        posY = 0;
+        playerPosition = new PlayerPosition(MODEL_SCALE_DIFFERENCE);
         playerSprites = sprites;
-        hitbox_height = height*MODEL_SCALE_DIFFERENCE;
-        hitbox_width = width*MODEL_SCALE_DIFFERENCE;
     }
     public Player(float posX, float posY, TextureAtlas sprites) {
-        this.posX = posX;
-        this.posY = posY;
+        playerPosition = new PlayerPosition(posX, posY, MODEL_SCALE_DIFFERENCE);
         playerSprites = sprites;
-        hitbox_height = height*MODEL_SCALE_DIFFERENCE;
-        hitbox_width = width*MODEL_SCALE_DIFFERENCE;
+
     }
     public Player(float posX, float posY, float height, float width, TextureAtlas sprites) {
-        this.posX = posX;
-        this.posY = posY;
-        this.height = height;
-        this.width = width;
+        playerPosition = new PlayerPosition(posX, posY, width, height, MODEL_SCALE_DIFFERENCE);
         playerSprites = sprites;
-        hitbox_height = height*MODEL_SCALE_DIFFERENCE;
-        hitbox_width = width*MODEL_SCALE_DIFFERENCE;
     }
 
     // Getters
-    public float getPosX() { return posX; }
-    public float getPosY() { return posY; }
-    public float getHeight() { return height; }
-    public float getWidth() { return width; }
-    public float getHitboxHeight() { return hitbox_height; }
-    public float getHitboxWidth() { return hitbox_width; }
-    public float getJumpHeight() { return MAX_JUMP_HEIGHT; }
-    public float getJumpTime() { return MAX_JUMP_TIME; }
+    public float getPosX() { return playerPosition.getPosX(); }
+    public float getPosY() { return playerPosition.getPosY(); }
+    public float getHeight() { return playerPosition.getHeight(); }
+    public float getWidth() { return playerPosition.getWidth(); }
+    public float getHitboxHeight() { return playerPosition.getHitboxHeight(); }
+    public float getHitboxWidth() { return playerPosition.getHitboxWidth(); }
+    public float getJumpHeight() { return playerPosition.getMAX_JUMP_HEIGHT(); }
+    public float getJumpTime() { return playerPosition.getMAX_JUMP_TIME(); }
     public float getAnimationDiff() { return MODEL_SCALE_DIFFERENCE; }
 
     // Setters
-    public void setPosX(float x) { posX = x; }
-    public void setPosY(float y) { posY = y; }
-    public void setJumpVelocity(float v) { jumpVelocity = v; }
+    public void setPosX(float x) {
+        playerPosition.setPosX(x);
+    }
+    public void setPosY(float y) {
+        playerPosition.setPosY(y);
+    }
+    public void setJumpVelocity(float v) {
+        playerPosition.setJumpVelocity(0);
+    }
     public void setInAir(boolean bool) {
         if(isMidGroundAttack())
             return;
@@ -137,16 +112,13 @@ public class Player {
     public boolean isMidGroundAttack() { return (state == playerState.ATTACKGROUND); }
     public boolean isMidAirAttack() { return (state == playerState.ATTACKAIR); }
 
-    private void addToPosX(float x) { posX += x; }
-    private void addToPosY(float y) { posY += y; }
-
     // Drawing Animations for the player.
     public void draw(Batch batch) {
         // Check to restart or continue animation.
         if(isSameAnimation())
-            state_time++;
+            stateTime++;
         else
-            state_time = 0;
+            stateTime = 0;
 
         // Get the correct animation for the action.
         Sprite[] animationInfo;
@@ -177,14 +149,14 @@ public class Player {
         }
 
         // Draw with correct frames.
-        boolean flip = (player_direction == direction.RIGHT);
+        boolean flip = (playerDirection == direction.RIGHT);
         int numOfFrames = animationInfo.length*FRAMES_PER_ANIMATION;
-        int frame = state_time % numOfFrames;
+        int frame = stateTime % numOfFrames;
         batch.draw(animationInfo[frame/FRAMES_PER_ANIMATION],
-                flip ? getPosX() + width : getPosX(),
+                flip ? getPosX() + playerPosition.getWidth() : getPosX(),
                 getPosY(),
-                flip ? -width : width,
-                height);
+                flip ? -playerPosition.getWidth() : playerPosition.getWidth(),
+                playerPosition.getHeight());
         prevAnimation = currAnimation;
     }
     private boolean isSameAnimation() {
@@ -230,28 +202,24 @@ public class Player {
         // Called when player moves left.
         if(!isInAir() && !isMidAirAttack() && !isMidGroundAttack()) {
             currAnimation = playerAnimationState.RUNNING;
-            runSpeed -= ACCELERATION_SPEED;
-            player_direction = direction.LEFT;
-            if(runSpeed < -MAX_RUN_SPEED)
-                runSpeed = -MAX_RUN_SPEED;
+            playerDirection = direction.LEFT;
+            playerPosition.applyLeftMoveToPosition();
         }
     }
     private void moveRight() {
         // Called when player moves right.
         if(!isInAir() && !isMidAirAttack() && !isMidGroundAttack()) {
             currAnimation = playerAnimationState.RUNNING;
-            runSpeed += ACCELERATION_SPEED;
-            player_direction = direction.RIGHT;
-            if(runSpeed > MAX_RUN_SPEED) { runSpeed = MAX_RUN_SPEED; }
+            playerDirection = direction.RIGHT;
+            playerPosition.applyRightMoveToPosition();
         }
     }
     private void jump(float gravity) {
         // Called when player jumps.
         if(!isInAir() && !isMidGroundAttack() && !isMidAirAttack()) {
             currAnimation = playerAnimationState.JUMPING;
-            jumpVelocity = INITIAL_JUMP_VELOCITY + gravity;
             state = playerState.INAIR;
-            posY++;        // Added to treat player an an object in the air.
+            playerPosition.applyJumpToPosition(gravity);
         }
     }
     private void attack() {
@@ -259,12 +227,12 @@ public class Player {
         if(!isMidGroundAttack() && !isMidAirAttack()) {
             if(isNeutral()) {
                 currAnimation = playerAnimationState.ATTACKBASIC;
-                att = new PlayerAttack(Attack.Basic, width, height);
+                att = new PlayerAttack(Attack.Basic, playerPosition.getWidth(), playerPosition.getHeight());
                 state = playerState.ATTACKGROUND;
             }
             else if(isInAir()) {
                 currAnimation = playerAnimationState.ATTACKAIR;
-                att = new PlayerAttack(Attack.BasicAir, width, height);
+                att = new PlayerAttack(Attack.BasicAir, playerPosition.getWidth(), playerPosition.getHeight());
                 state = playerState.ATTACKAIR;
             }
         }
@@ -274,12 +242,12 @@ public class Player {
         if(!isMidGroundAttack() && !isMidAirAttack()) {
             if(isNeutral()) {
                 currAnimation = playerAnimationState.ATTACKBASICUP;
-                att = new PlayerAttack(Attack.BasicUp, width, height);
+                att = new PlayerAttack(Attack.BasicUp, playerPosition.getWidth(), playerPosition.getHeight());
                 state = playerState.ATTACKGROUND;
             }
             else if(isInAir()) {
                 currAnimation = playerAnimationState.ATTACKAIRUP;
-                att = new PlayerAttack(Attack.UpAir, width, height);
+                att = new PlayerAttack(Attack.UpAir, playerPosition.getWidth(), playerPosition.getHeight());
                 state = playerState.ATTACKAIR;
             }
         }
@@ -297,8 +265,8 @@ public class Player {
         return true;
     }
     public AttackFrame getAttackFrame() {
-        boolean facingRight = player_direction == player_direction.RIGHT;
-        AttackFrame hitboxData = att.getNext(width, facingRight);
+        boolean facingRight = playerDirection == playerDirection.RIGHT;
+        AttackFrame hitboxData = att.getNext(playerPosition.getWidth(), facingRight);
         return hitboxData;
     }
 
@@ -309,21 +277,11 @@ public class Player {
         }
     }
     public void applyGravity(float g) {
-        jumpVelocity += g;
-        if(jumpVelocity > MAX_FALL_SPEED)
-            posY += MAX_FALL_SPEED;
-        else addToPosY(jumpVelocity);
+        playerPosition.applyGravity(g);
     }
     public void applyMomentum() { // Applying Deceleration
-        if(state != playerState.INAIR && state != playerState.ATTACKAIR ) {
-            if (runSpeed > DECELERATION_SPEED)
-                runSpeed -= DECELERATION_SPEED;
-            else if (runSpeed < -DECELERATION_SPEED)
-                runSpeed += DECELERATION_SPEED;
-            else
-                runSpeed = 0;
-        }
-        addToPosX(runSpeed);
+        boolean changeRunSpeed = state!=Player.playerState.INAIR && state!=Player.playerState.ATTACKAIR;
+        playerPosition.calculateAndApplyRunSpeed(changeRunSpeed);
     }
 
 }

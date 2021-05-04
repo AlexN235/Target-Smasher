@@ -39,37 +39,4 @@ public class Block {
     public float getTopSideLocation() { return getY() + getBlockHeight(); }
     public float getBotSideLocation() { return getY(); }
 
-    /*
-    // Used to determine if player/entity could possibly interact/collide with the block.
-    public boolean isEntityAtX(float xLeftSide, float xRightSide) {
-        boolean playerInBlockRange = (xLeftSide <= this.x+this.blockWidth) && (xRightSide >= this.x);
-        return playerInBlockRange;
-    }
-    public boolean isEntityAtY(float yBotSide, float yTopSide) {
-        boolean playerInBlockRange = (yBotSide <= this.y+this.blockHeight) && (yTopSide >= this.y);
-        return playerInBlockRange;
-    }
-    public boolean collideWithLeftSide(float currPos, float nextPos) {
-        // Assumes the entity's Y position is in range of the block -- isEntityAtY is true.
-        boolean collides = (currPos <= this.x) && (nextPos >= this.x);
-        return collides;
-    }
-    public boolean collideWithRightSide(float currPos, float nextPos) {
-        // Assumes the entity's Y position is in range of the block -- isEntityAtY is true.
-        float blockRightSide = this.x+this.blockWidth;
-        boolean collides = (currPos >= blockRightSide) && (nextPos < blockRightSide);
-        return collides;
-    }
-    public boolean collideWithTopSide(float currPos, float nextPos) {
-        // Assumes the entity's X position is in range of the block -- isEntityX is true.
-        float blockTopSide = this.y+this.blockHeight;
-        boolean collides = (currPos >= blockTopSide) && (nextPos < blockTopSide);
-        return collides;
-    }
-    public boolean collideWithBotSide(float currPos, float nextPos) {
-        // Assumes the entity's X position is in range of the block -- isEntityX is true.
-        boolean collides = (currPos <= this.y) && (nextPos > this.y);
-        return collides;
-    }
-    */
 }
